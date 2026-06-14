@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://win95-portfolio.vercel.app/sitemap.xml
