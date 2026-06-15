@@ -1,0 +1,63 @@
+import os
+from supabase import create_client, Client
+
+_client: Client = None
+
+def get_client():
+    global _client
+    if _client is None:
+        url = os.environ.get("SUPABASE_URL")
+        key = os.environ.get("SUPABASE_KEY")
+        if not url or not key:
+            raise ValueError("SUPABASE_URL and SUPABASE_KEY must be set")
+        _client = create_client(url, key)
+    return _client
+
+def get_existing_urls(table: str) -> set[str]:
+    """Fetch existing URLs for deduplication."""
+    try:
+        client = get_client()
+        # Fetching only URLs for efficiency
+        resp = client.table(table).select("url").execute()
+        return {row['url'] for row in resp.data}
+    except Exception as e:
+        print(f"[Supabase] Error fetching existing URLs: {e}")
+        return set()
+
+def sync(table: str, items: list[dict]) -> tuple[int, int]:
+    """Upsert items into Supabase. Returns (added, skipped)."""
+    if not items:
+        return 0, 0
+    
+    existing = get_existing_urls(table)
+    to_insert = []
+    
+    for item in items:
+        if item.get("url") in existing:
+            continue
+        
+        # Prepare record for Supabase
+        record = {
+            "name": item.get("name"),
+            "url": item.get("url"),
+            "company": item.get("company"),
+            "source": item.get("source"),
+            "date_found": item.get("date_found"),
+            "ai_score": item.get("ai_score"),
+            "ai_summary": item.get("ai_summary"),
+            "ai_notes": item.get("ai_notes"),
+            "status": "New"
+        }
+        to_insert.append(record)
+    
+    if not to_insert:
+        return 0, len(items)
+    
+    try:
+        client = get_client()
+        # Batch insert
+        client.table(table).upsert(to_insert).execute()
+        return len(to_insert), len(items) - len(to_insert)
+    except Exception as e:
+        print(f"[Supabase] Push failed: {e}")
+        return 0, 0

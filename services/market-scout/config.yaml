@@ -1,0 +1,26 @@
+# c2c Market Scout Configuration
+
+# What to collect (pre-filter before AI)
+filters:
+  required_keywords: ["ai", "llm", "rag", "pytorch", "agent", "generative"]
+  blocked_keywords: ["crypto", "web3", "nft", "marketing", "sales"]
+
+# Your priorities — AI uses these for scoring
+priorities:
+  - "Senior technical roles (Engineer, Scientist, Architect)"
+  - "Core AI research or implementation (LLMs, Transformers, Diffusion)"
+  - "High-performance systems (CUDA, C++, Python optimization)"
+  - "Top tier labs or innovative startups"
+
+# Storage
+storage:
+  provider: "supabase"
+  table: "market_leads"
+
+# AI settings
+ai:
+  enabled: true
+  model: "gemini-2.0-flash"
+  min_score: 50               # Filter out items below this score
+  rate_limit_seconds: 7      # Seconds between API calls (Gemini Free Tier)
+  batch_size: 5              # Items per API call
