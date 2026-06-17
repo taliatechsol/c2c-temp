@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, APIRouter
 from fastapi.responses import Response
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
@@ -27,9 +27,10 @@ except ImportError:
     def get_client(): return None
 
 app = FastAPI()
+router = APIRouter(prefix="/api")
 
 # --- CONSTANTS ---
-
+# ... (rest of constants)
 RECOMMENDATION_MAPPING = {
     "Builder": ["Engineer", "Developer", "Researcher", "Architect"],
     "Leader": ["Manager", "Lead", "Culture", "Director"],
@@ -38,7 +39,7 @@ RECOMMENDATION_MAPPING = {
 }
 
 # --- MODELS ---
-
+# ... (all models)
 class InstitutionOnboard(BaseModel):
     name: str
     type: str
@@ -77,7 +78,7 @@ class PortfolioRequest(BaseModel):
     folders: List[Dict[str, Any]]
 
 # --- HELPERS ---
-
+# ... (all helpers)
 def parse_scoring_logic(logic_str: str, item_type: str) -> Dict[str, Any]:
     if not logic_str or not isinstance(logic_str, str):
         return {}
@@ -225,7 +226,7 @@ def generate_portfolio_json(portfolio_data):
 def status():
     return {"status": "c2c api online"}
 
-@app.post("/onboard/institution")
+@router.post("/onboard/institution")
 async def onboard_institution(inst: InstitutionOnboard):
     client = get_client()
     if not client: raise HTTPException(status_code=500, detail="Supabase client not initialized")
@@ -235,7 +236,7 @@ async def onboard_institution(inst: InstitutionOnboard):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/onboard/student")
+@router.post("/onboard/student")
 async def onboard_student(student: StudentOnboard):
     client = get_client()
     if not client: raise HTTPException(status_code=500, detail="Supabase client not initialized")
@@ -251,7 +252,7 @@ async def onboard_student(student: StudentOnboard):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/assessment/generate")
+@router.get("/assessment/generate")
 async def generate_assessment(num_per_section: int = 25):
     client = get_client()
     if not client: raise HTTPException(status_code=500, detail="Supabase client not initialized")
@@ -268,7 +269,7 @@ async def generate_assessment(num_per_section: int = 25):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/assessment/submit")
+@router.post("/assessment/submit")
 async def submit_assessment(submit: AssessmentSubmit):
     client = get_client()
     if not client: raise HTTPException(status_code=500, detail="Supabase client not initialized")
@@ -330,7 +331,7 @@ async def submit_assessment(submit: AssessmentSubmit):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/cohort/{institution_id}")
+@router.get("/cohort/{institution_id}")
 async def get_cohort_report(institution_id: str):
     client = get_client()
     if not client: raise HTTPException(status_code=500, detail="Supabase client not initialized")
@@ -381,7 +382,7 @@ async def get_cohort_report(institution_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/leads")
+@router.get("/leads")
 async def get_leads():
     client = get_client()
     if not client: raise HTTPException(status_code=500, detail="Supabase client not initialized")
@@ -391,7 +392,7 @@ async def get_leads():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/feedback/submit")
+@router.post("/feedback/submit")
 async def submit_feedback(submit: FeedbackSubmit):
     client = get_client()
     if not client: raise HTTPException(status_code=500, detail="Supabase client not initialized")
@@ -402,7 +403,7 @@ async def submit_feedback(submit: FeedbackSubmit):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/student/{student_id}")
+@router.get("/student/{student_id}")
 async def get_student(student_id: str):
     client = get_client()
     if not client: raise HTTPException(status_code=500, detail="Supabase client not initialized")
@@ -432,7 +433,7 @@ async def get_student(student_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/employer/candidates")
+@router.get("/employer/candidates")
 async def get_employer_candidates():
     client = get_client()
     if not client: raise HTTPException(status_code=500, detail="Supabase client not initialized")
@@ -482,7 +483,7 @@ async def get_employer_candidates():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/audit")
+@router.post("/audit")
 async def audit(request: AuditRequest):
     try:
         result = score_job_lead(request.job_description, request.candidate)
@@ -490,7 +491,7 @@ async def audit(request: AuditRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/ordeal")
+@router.post("/ordeal")
 async def ordeal(request: OrdealRequest):
     try:
         orchestrator = C2C_Orchestrator_V2(request.candidate_name, request.gaps)
@@ -498,14 +499,14 @@ async def ordeal(request: OrdealRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/portfolio")
+@router.post("/portfolio")
 async def portfolio(request: PortfolioRequest):
     try:
         return generate_portfolio_json(request.dict())
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/alerts/student/{student_id}")
+@router.get("/alerts/student/{student_id}")
 async def get_student_alerts(student_id: str):
     client = get_client()
     if not client: raise HTTPException(status_code=500, detail="Supabase client not initialized")
@@ -517,5 +518,7 @@ async def get_student_alerts(student_id: str):
     except Exception as e:
         print(f"Error fetching alerts (table might not exist yet): {e}")
         return []
+
+app.include_router(router)
 
 

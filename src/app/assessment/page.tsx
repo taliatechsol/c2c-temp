@@ -209,7 +209,7 @@ export default function Assessment() {
   const progressPercentage = ((currentIndex) / questions.length) * 100;
 
   return (
-    <div className="min-h-screen bg-[#0e1416] text-[#dde4e5] selection:bg-cyan-500/30 selection:text-white pb-24 relative overflow-hidden">
+    <div className="text-[#dde4e5] selection:bg-cyan-500/30 selection:text-white pb-24 relative overflow-hidden">
       
       {/* Immersive Header */}
       <div className="w-full bg-black/60 border-b border-white/5 backdrop-blur-2xl sticky top-0 z-50">

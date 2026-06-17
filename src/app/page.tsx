@@ -15,7 +15,7 @@ import {
 
 export default function Home() {
   return (
-    <div className="bg-[#0e1416] text-[#dde4e5] selection:bg-cyan-500/30">
+    <div className="text-[#dde4e5] selection:bg-cyan-500/30">
       {/* Hero Section - Command Center */}
       <div className="relative isolate pt-14 overflow-hidden">
         {/* Ambient Background Elements */}

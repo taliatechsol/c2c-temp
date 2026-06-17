@@ -115,11 +115,10 @@ export default function Onboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0e1416] text-[#dde4e5] selection:bg-cyan-500/30 py-20 px-6 relative overflow-hidden">
+    <div className="min-h-screen text-[#dde4e5] selection:bg-cyan-500/30 py-20 px-6 relative overflow-hidden">
       {/* Ambient Background Elements */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-cyan-500/5 blur-[120px] -z-10 pointer-events-none"></div>
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-500/5 blur-[120px] -z-10 pointer-events-none"></div>
-      <div className="absolute inset-0 bg-cyber-grid bg-[length:40px_40px] opacity-[0.03] -z-10"></div>
 
       <div className="max-w-xl mx-auto relative z-10">
         <div className="text-center mb-12">

@@ -78,7 +78,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-80px)] flex items-center justify-center p-6 bg-[#0e1416] relative overflow-hidden">
+    <div className="min-h-[calc(100vh-80px)] flex items-center justify-center p-6 relative overflow-hidden">
       {/* Background Ornaments */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/10 rounded-full blur-[120px]" />
