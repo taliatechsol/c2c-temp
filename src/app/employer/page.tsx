@@ -40,6 +40,9 @@ export default function EmployerPage() {
   const [minEQ, setMinEQ] = useState(75);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'match' | 'tech' | 'sales'>('match');
+  const [activeTab, setActiveTab] = useState<'discover' | 'jobs'>('discover');
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [isLoadingJobs, setIsLoadingJobs] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -74,7 +77,23 @@ export default function EmployerPage() {
         setIsLoading(false);
       }
     };
+    
+    const fetchJobs = async () => {
+      setIsLoadingJobs(true);
+      try {
+        const res = await authFetch("/api/employer/jobs");
+        if (res.ok) {
+          setJobs(await res.json());
+        }
+      } catch (err) {
+        console.error("Failed to fetch jobs:", err);
+      } finally {
+        setIsLoadingJobs(false);
+      }
+    };
+
     fetchCandidates();
+    fetchJobs();
   }, [authLoading]);
 
   const filteredCandidates = candidates
@@ -136,110 +155,67 @@ export default function EmployerPage() {
                   <span className={`absolute top-1 w-3 h-3 bg-[#8aebff] rounded-full transition-all ${strictFounderFit ? 'right-1' : 'left-1 bg-white'}`}></span>
                 </button>
               </div>
-              <p className="text-[11px] text-[#bbc9cd] leading-tight">Prioritize candidates with high adaptability and high-growth potential scores.</p>
-            </div>
-
-            {/* Sliders */}
-            <div className="space-y-12">
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className={`text-[12px] font-bold tracking-[0.1em] font-mono`}>Min AQ Score</span>
-                  <span className={`text-sm font-medium tracking-[0.05em] text-[#8aebff] font-mono`}>{minAQ}</span>
-                </div>
-                <input 
-                  className="w-full h-1 bg-[#2f3638] rounded-lg appearance-none cursor-pointer accent-[#8aebff]" 
-                  type="range" 
-                  value={minAQ}
-                  onChange={(e) => setMinAQ(parseInt(e.target.value))}
-                />
-              </div>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className={`text-[12px] font-bold tracking-[0.1em] font-mono`}>Min EQ Score</span>
-                  <span className={`text-sm font-medium tracking-[0.05em] text-[#8aebff] font-mono`}>{minEQ}</span>
-                </div>
-                <input 
-                  className="w-full h-1 bg-[#2f3638] rounded-lg appearance-none cursor-pointer accent-[#8aebff]" 
-                  type="range" 
-                  value={minEQ}
-                  onChange={(e) => setMinEQ(parseInt(e.target.value))}
-                />
-              </div>
-            </div>
-
-            {/* Advanced Skill Tags */}
-            <div className="space-y-4">
-              <span className={`text-[12px] font-bold tracking-[0.1em] font-mono`}>Required Competencies</span>
-              <div className="flex flex-wrap gap-1">
-                <span className={`px-2 py-1 bg-[#8aebff]/10 text-[#8aebff] text-[10px] font-medium tracking-[0.05em] rounded border border-[#8aebff]/20 font-mono`}>TypeScript</span>
-                <span className={`px-2 py-1 bg-white/5 text-[#bbc9cd] text-[10px] font-medium tracking-[0.05em] rounded border border-white/10 font-mono`}>Rust</span>
-                <span className={`px-2 py-1 bg-white/5 text-[#bbc9cd] text-[10px] font-medium tracking-[0.05em] rounded border border-white/10 font-mono`}>LLM Fine-tuning</span>
-                <span className={`px-2 py-1 bg-white/5 text-[#bbc9cd] text-[10px] font-medium tracking-[0.05em] rounded border border-white/10 font-mono`}>Solidity</span>
-              </div>
-            </div>
-
-            <button className="w-full bg-[#3626ce] text-[#b3b1ff] py-4 text-[12px] font-bold tracking-[0.1em] rounded-lg hover:brightness-110 active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2">
-              <Plus className="w-4 h-4" />
-              POST NEW JOB
+    <div className={`bg-[#0e1416] text-[#dde4e5] h-screen flex flex-col font-sans`}>
+      <header className="h-16 border-b border-white/5 flex items-center justify-between px-6 shrink-0">
+        <div className="flex items-center gap-8">
+          <h1 className="text-xl font-bold font-mono tracking-widest text-cyan-400">NEURAL_RECRUIT</h1>
+          <nav className="hidden md:flex items-center gap-8">
+            <button 
+              onClick={() => setActiveTab('discover')}
+              className={`text-sm font-mono tracking-widest uppercase transition-colors ${activeTab === 'discover' ? 'text-cyan-400 font-bold' : 'text-white/40 hover:text-white/80'}`}
+            >
+              Discover_Talent
             </button>
-          </div>
-          
-          <div className="mt-auto p-6 border-t border-white/5 space-y-2">
-            <div className="flex items-center gap-4 text-[#bbc9cd] hover:text-white transition-colors cursor-pointer group">
-              <HelpCircle className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-              <span className={`text-[12px] font-bold tracking-[0.1em] font-mono`}>Support</span>
-            </div>
-            <button onClick={handleLogout} className="w-full flex items-center gap-4 text-[#bbc9cd] hover:text-white transition-colors cursor-pointer group text-left">
-              <LogOut className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              <span className={`text-[12px] font-bold tracking-[0.1em] font-mono`}>Logout</span>
+            <button 
+              onClick={() => setActiveTab('jobs')}
+              className={`text-sm font-mono tracking-widest uppercase transition-colors ${activeTab === 'jobs' ? 'text-cyan-400 font-bold' : 'text-white/40 hover:text-white/80'}`}
+            >
+              My_Job_Postings
             </button>
-          </div>
-        </aside>
+            <Link href="#" className="text-sm font-mono tracking-widest text-white/40 hover:text-white/80 uppercase transition-colors">
+              Saved_Profiles
+            </Link>
+          </nav>
+        </div>
+        <button onClick={handleLogout} className="text-white/40 hover:text-white text-sm font-mono uppercase tracking-widest">Logout</button>
+      </header>
 
-        {/* Mobile backdrop */}
-        {mobileMenuOpen && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden" onClick={() => setMobileMenuOpen(false)}></div>
-        )}
-
-        {/* Main Content Area */}
-        <main className="flex-1 relative overflow-hidden bg-[#0e1416]">
-          <div className="relative z-10 h-full p-6 overflow-y-auto">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
+      <main className="flex-1 flex overflow-hidden">
+        
+        {activeTab === 'discover' ? (
+        <>
+        {/* Left Sidebar - Filters */}
+        <div className="w-72 bg-[#0a0f11] border-r border-white/5 p-6 flex flex-col overflow-y-auto hidden md:flex">
+          <div className="mb-8">
+            <h3 className="text-xs font-mono font-bold text-white/40 uppercase tracking-widest mb-4">Talent Calibration</h3>
+            
+            <div className="space-y-6">
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <button 
-                    onClick={() => setMobileMenuOpen(true)}
-                    className="lg:hidden p-2 bg-[#1a2122] rounded-md border border-white/10 text-[#8aebff]"
-                    aria-label="Toggle filters menu"
-                  >
-                    <List className="w-5 h-5" />
-                  </button>
-                  <Users className="text-[#8aebff] w-6 h-6" />
-                  <h1 className="text-3xl font-extrabold text-[#dde4e5] tracking-tight leading-none">Talent Pool</h1>
-                </div>
-                <p className={`text-[#bbc9cd] text-sm tracking-[0.05em] font-medium font-mono`}>Displaying {filteredCandidates.length} elite matches for "Senior Systems Architect" • Cohort 2024.1</p>
+                <label className="flex items-center justify-between text-xs font-mono text-[#bbc9cd] mb-2">
+                  <span>Minimum AQ Score</span>
+                  <span className="text-cyan-400 font-bold">{minAQ}</span>
+                </label>
+                <input 
+                  type="range" 
+                  min="50" 
+                  max="100" 
+                  value={minAQ} 
+                  onChange={(e) => setMinAQ(parseInt(e.target.value))}
+                  className="w-full accent-cyan-500 h-1 bg-white/10 rounded-full appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-cyan-400 [&::-webkit-slider-thumb]:rounded-full cursor-pointer"
+                />
               </div>
-              <div className="flex flex-wrap gap-2 items-center">
-                <select 
-                  value={sortBy} 
-                  onChange={(e) => setSortBy(e.target.value as 'match' | 'tech' | 'sales')}
-                  className="bg-[#1a2122] border border-white/10 rounded-lg px-3 py-2 text-sm text-[#dde4e5] focus:outline-none focus:border-[#8aebff]/50 font-mono cursor-pointer"
-                >
-                  <option value="match">Rank by AI Match</option>
-                  <option value="tech">Rank by Tech Fit</option>
-                  <option value="sales">Rank by Sales Fit</option>
-                </select>
-                <div className="flex items-center bg-[#1a2122] rounded-lg p-1 border border-white/10">
-                  <button className="p-2 bg-[#8aebff]/20 text-[#8aebff] rounded-md" aria-label="Grid layout">
-                    <LayoutGrid className="w-4 h-4" />
-                  </button>
-                  <button className="p-2 text-[#bbc9cd] hover:text-[#dde4e5]" aria-label="List layout">
-                    <List className="w-4 h-4" />
-                  </button>
-                </div>
-                <button className="flex items-center gap-2 px-4 py-2 bg-[#0f172a]/40 backdrop-blur-md rounded-lg border border-white/10 text-[#dde4e5] text-sm transition-all hover:border-[#8aebff]/40">
-                  <Download className="w-4 h-4" />
-                  Export CSV
+
+              <div>
+                <label className="flex items-center justify-between text-xs font-mono text-[#bbc9cd] mb-2">
+                  <span>Minimum EQ Score</span>
+                  <span className="text-indigo-400 font-bold">{minEQ}</span>
+                </label>
+                <input 
+                  type="range" 
+                  min="50" 
+                  max="100" 
+                  value={minEQ} 
+                  onChange={(e) => setMinEQ(parseInt(e.target.value))}
                 </button>
               </div>
             </div>

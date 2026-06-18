@@ -25,6 +25,7 @@ import { useRequireAuth } from "@/hooks/useAuth";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import type { DimensionScores, Alert } from "@/types";
 import { authFetch } from '@/lib/authFetch';
+import ProfileCompletionWidget from "@/components/profile/ProfileCompletionWidget";
 
 interface DashboardData {
   student: {
@@ -130,6 +131,13 @@ export default function Dashboard() {
 
       <main className="max-w-[1500px] mx-auto px-6 pt-12">
         
+        {data?.student && (
+          <ProfileCompletionWidget 
+            student={data.student} 
+            onProfileUpdate={() => window.location.reload()} 
+          />
+        )}
+
         {/* Profile Hero Section */}
         <section className="mb-12">
           <div className="relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-8 md:p-16 overflow-hidden">
